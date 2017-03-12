@@ -10,4 +10,12 @@ clean:
 	rm *.o main
 
 run:
+	make
 	./main
+
+debug:
+	gdb ./main
+
+reset:
+	make clean
+	make run
