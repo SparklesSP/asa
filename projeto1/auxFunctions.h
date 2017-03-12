@@ -6,11 +6,13 @@ typedef struct node {
 
 link* initializeNodes(link* list, int numFotos);
 
-link* addNode(link* list, int lesser, int greater);
+link* addNode(link* list, int lesser, int greater, int* values);
+
+int getStartingNode(int* values, int numFotos);
 
 int tarjanAlgorithm(link* list, int numFotos);
 
-int tarjanVisit(link* list, int* low, int* d, link node, int visited, link* stack, int stackTop);
+int tarjanVisit(int* scc, link* list, int* low, int* d, link node, int visited, link* stack, int stackTop);
 
 void sortFrees(link* list, int numFotos);
 
