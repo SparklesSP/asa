@@ -12,7 +12,7 @@ int getStartingNode(int* values, int numFotos);
 
 int tarjanAlgorithm(link* list, int numFotos);
 
-int tarjanVisit(int* scc, link* list, int* low, int* d, link node, int visited, link* stack, int stackTop);
+int tarjanVisit(int* scc, int sccCount, link* list, int* low, int* d, link node, int visited, link* stack, int stackTop, int numFotos);
 
 void sortFrees(link* list, int numFotos);
 

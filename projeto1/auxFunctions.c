@@ -3,8 +3,8 @@
 #include "auxFunctions.h"
 
 #define INFINITY 10000
-int sccCount = 0;
 int startingNode = -1;
+int worked = 0;
 
 link* initializeNodes(link* list, int numFotos) {
 
@@ -71,6 +71,7 @@ int tarjanAlgorithm(link* list, int numFotos) {
 
   int visited = 0;
   int stackTop = 0;
+  int sccCount = 0;
   int low[numFotos];
   int d[numFotos];
   int scc[numFotos];
@@ -80,11 +81,11 @@ int tarjanAlgorithm(link* list, int numFotos) {
 
   link* stack = malloc(sizeof(struct node) * numFotos);
 
-  int a = tarjanVisit(scc, list, low, d, list[startingNode], visited, stack, stackTop);
+  int a = tarjanVisit(scc, sccCount, list, low, d, list[startingNode], visited, stack, stackTop, numFotos);
   if (a == -1) {
     free(stack);
     return -1;
-  } else if (sccCount < numFotos) {
+  } else if (a == -2) {
     free(stack);
     return -2;
   }
@@ -98,45 +99,46 @@ int tarjanAlgorithm(link* list, int numFotos) {
   return 1;
 }
 
-int tarjanVisit(int* scc, link* list, int* low, int* d, link node, int visited, link* stack, int stackTop) {
+int tarjanVisit(int* scc, int sccCount, link* list, int* low, int* d, link node, int visited, link* stack, int stackTop, int numFotos) {
 
+  int top = numFotos - 1;
   d[node->value] = visited;
   low[node->value] = visited++;
 
-  stack[stackTop++] = node;
-  link v = NULL;
-  if (node->next != NULL)
-    v = list[node->next->value];
-
+  stack[stackTop] = node;
+  link v = node->next;
   while(v != NULL) {
 
     if (inStack(v, stack, stackTop) == 1)
       return -1;
 
-    if(d[v->value] == INFINITY) {
+    int a = tarjanVisit(scc, sccCount + 1, list,low, d, list[v->value], visited, stack, stackTop + 1, numFotos);
+    if (a == -1)
+      return -1;
+    else if (a == 1)
+      return 1;
 
-      tarjanVisit(scc, list,low, d, v, visited, stack, stackTop);
-      low[node->value] = min(low[node->value], low[v->value]);
+    low[node->value] = min(low[node->value], low[v->value]);
+    v = v->next;
 
-    }
-
-    if (v->next != NULL)
-      v = list[v->next->value];
-    else
-      v = NULL;
   }
 
   if(low[node->value] == d[node->value]) {
 
-    v = stack[stackTop--];
     while(node != v) {
-
-      v = stack[stackTop--];
+      v = stack[top--];
+      if (v == NULL)
+        return -2;
       scc[sccCount] = v->value + 1;
-      sccCount++;
       }
   }
-  return 1;
+  if (sccCount == numFotos - 1) {
+    worked = 1;
+  }
+  if (sccCount == 0 && worked == 1)
+    return 1;
+
+  return -2;
 }
 
 int min(int a, int b) {
