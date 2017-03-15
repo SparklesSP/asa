@@ -27,9 +27,6 @@ void freeRow(link node);
 
 int min(int a, int b);
 
-int inStack(link node, link* stack, int top);
-
-
 int main() {
 
   int numFotos, numPares;
@@ -176,18 +173,19 @@ int tarjanVisit(int* scc, int sccCount, link* list, int* low, int* d, link node,
   link v = node->next;
   while(v != NULL && worked == 0) {
 
-    if (inStack(v, stack, stackTop) == 1)
+    if (d[v->value] != INFINITY)
       return -1;
 
     int a = tarjanVisit(scc, sccCount + 1, list,low, d, list[v->value], visited, stack, stackTop + 1, numFotos);
-    if (a == -1)
+    d[v->value] = INFINITY;
+    if (a == -1) {
       return -1;
+    }
     else if (a == 1)
       return 1;
 
     low[node->value] = min(low[node->value], low[v->value]);
     v = v->next;
-
   }
 
   if(low[node->value] == d[node->value]) {
@@ -199,11 +197,12 @@ int tarjanVisit(int* scc, int sccCount, link* list, int* low, int* d, link node,
       scc[sccCount] = v->value + 1;
       }
   }
-  if (sccCount == numFotos - 1) {
+  if (sccCount == numFotos - 1)
     worked = 1;
-  }
+
   if (sccCount == 0 && worked == 1)
     return 1;
+
 
   return -2;
 }
@@ -214,14 +213,4 @@ int min(int a, int b) {
     return a;
 
   return b;
-}
-
-int inStack(link node, link* stack, int top) {
-  int i;
-  for (i = 0; i < top; i++) {
-
-    if (node->value == stack[i]->value)
-      return 1;
-  }
-  return 0;
 }
