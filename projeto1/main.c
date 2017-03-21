@@ -8,26 +8,24 @@
 typedef struct node {
 
   int value;
-  int* nexts;
-  int numNexts;
-
+  struct node *next;
 } *link;
 
 link* initializeNodes(link* list, int numFotos);
 
 link* addNode(link* list, int lesser, int greater, int* values);
 
-int getStartingNode(int* values, int numFotos, int* d);
+int getStartingNode(int* values, int numFotos);
 
-int tarjanAlgorithm(link* list, int numFotos, int* d);
+int tarjanAlgorithm(link* list, int numFotos);
 
 int tarjanVisit(int* scc, int sccCount, link* list, int* d, link node, int visited, link* stack, int stackTop, int numFotos);
 
 void sortFrees(link* list, int numFotos);
 
-int min(int a, int b);
+void freeRow(link node);
 
-int worked = 0;
+int min(int a, int b);
 
 int main() {
 
@@ -46,8 +44,7 @@ int main() {
     list = addNode(list, lesser, greater, values);
   }
 
-  int d[numFotos];
-  int a = getStartingNode(values, numFotos, d);
+  int a = getStartingNode(values, numFotos);
   if (a == -2) {
 
     printf("%s\n", MSG_INCOMPLETE);
@@ -56,7 +53,7 @@ int main() {
     printf("%s\n", MSG_ERROR);
   } else {
 
-    int result = tarjanAlgorithm(list, numFotos, d);
+    int result = tarjanAlgorithm(list, numFotos);
 
     if (result == -1)
       printf("%s\n", MSG_ERROR);
@@ -70,6 +67,7 @@ int main() {
 
 
 int startingNode = -1;
+int worked = 0;
 
 link* initializeNodes(link* list, int numFotos) {
   int i;
@@ -77,26 +75,36 @@ link* initializeNodes(link* list, int numFotos) {
 
     list[i] = malloc(sizeof(struct node));
     list[i]->value = i;
-    list[i]->numNexts = 0;
-    list[i]->nexts = malloc(sizeof(int) * numFotos);
+    list[i]->next = NULL;
   }
   return list;
 }
 
 link* addNode(link* list, int lesser, int greater, int* values) {
 
-  values[greater - 1] = -1;
-  list[lesser - 1]->nexts[list[lesser - 1]->numNexts++] = greater - 1;
+  link temp;
+
+  if(list[lesser - 1]->next != NULL)
+    temp = list[lesser - 1]->next;
+  else
+    temp = NULL;
+
+  link newNode = malloc(sizeof(struct node));
+  newNode->value = greater - 1;
+  newNode->next = temp;
+
+
+  values[newNode->value] = -1;
+  list[lesser - 1]->next = newNode;
   return list;
 }
 
-int getStartingNode(int* values, int numFotos, int* d) {
+int getStartingNode(int* values, int numFotos) {
 
   int count = 0;
   int i;
   for (i = 0; i < numFotos; i++) {
 
-    d[i] = INFINITY;
     if(values[i] != -1) {
       startingNode = i;
       count++;
@@ -107,12 +115,33 @@ int getStartingNode(int* values, int numFotos, int* d) {
   return startingNode;
 }
 
-int tarjanAlgorithm(link* list, int numFotos, int* d) {
+void sortFrees(link* list, int numFotos) {
+  int i;
+  for (i = 0; i < numFotos; i++) {
+
+    freeRow(list[i]);
+  }
+  free(list);
+}
+
+void freeRow(link node) {
+
+  if(node->next != NULL)
+    freeRow(node->next);
+
+  free(node);
+}
+
+int tarjanAlgorithm(link* list, int numFotos) {
 
   int visited = 0;
   int stackTop = 0;
   int sccCount = 0;
+  int d[numFotos];
   int scc[numFotos];
+  int i;
+  for (i = 0; i < numFotos; i++)
+    d[i] = INFINITY;
 
   link* stack = malloc(sizeof(struct node) * numFotos);
 
@@ -121,7 +150,8 @@ int tarjanAlgorithm(link* list, int numFotos, int* d) {
 
     free(stack);
     return -1;
-  } else if (a == -2) {
+  }
+  else if (a == -2) {
 
     free(stack);
     return -2;
@@ -129,10 +159,9 @@ int tarjanAlgorithm(link* list, int numFotos, int* d) {
   free(stack);
 
   int n;
-  for(n = 0; n < numFotos; n++) {
-
+  for(n = 0; n < numFotos; n++)
     printf("%d ", scc[n]);
-  }
+
   printf("\n");
   return 1;
 }
@@ -140,53 +169,33 @@ int tarjanAlgorithm(link* list, int numFotos, int* d) {
 int tarjanVisit(int* scc, int sccCount, link* list, int* d, link node, int visited, link* stack, int stackTop, int numFotos) {
 
   d[node->value] = visited++;
-
   stack[stackTop] = node;
-  link v;
-  int i = 0;
-  int value = node->value;
-  if (node->numNexts > 0)
-    for (i = 0; i < node->numNexts && worked == 0; i++) {
 
-      v = list[node->nexts[i]];
-      if (d[v->value] != INFINITY)
-        return -1;
-      int a = tarjanVisit(scc, sccCount + 1, list, d, v, visited, stack, stackTop + 1, numFotos);
-      d[value] = INFINITY;
-      if (a == -1)
-        return -1;
-    }
+  link v = node->next;
+  while(v != NULL && worked == 0) {
 
+    if (d[v->value] != INFINITY)
+      return -1;
 
+    int a = tarjanVisit(scc, sccCount + 1, list, d, list[v->value], visited, stack, stackTop + 1, numFotos);
+    d[v->value] = INFINITY;
+
+    if (a == -1)
+      return -1;
+    else if (a == 1)
+      return 1;
+
+    v = v->next;
+  }
+
+  d[sccCount] = INFINITY;
+  scc[sccCount] = stack[sccCount]->value + 1;
 
   if (sccCount == numFotos - 1)
     worked = 1;
 
-  scc[sccCount] = stack[sccCount]->value + 1;
-
   if (sccCount == 0 && worked == 1)
     return 1;
-  d[value] = INFINITY;
+
   return -2;
-
-
-}
-
-int min(int a, int b) {
-
-  if (a <= b)
-    return a;
-
-  return b;
-}
-
-void sortFrees(link* list, int numFotos) {
-
-  int i;
-  for (i = 0; i < numFotos; i++) {
-
-    free(list[i]->nexts);
-    free(list[i]);
-  }
-  free(list);
 }
