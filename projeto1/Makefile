@@ -1,5 +1,5 @@
 main:
-	gcc -c -g main.c
+	gcc -Wall -ansi -c -g main.c
 	gcc -o main main.o
 
 clean:
