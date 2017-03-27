@@ -1,0 +1,11 @@
+Input tests/10000_59967_0.in benchmark took 41 milliseconds for 1 repetitions
+Input tests/20000_119953_0.in benchmark took 107 milliseconds for 1 repetitions
+Input tests/30000_179966_0.in benchmark took 181 milliseconds for 1 repetitions
+Input tests/40000_239960_0.in benchmark took 210 milliseconds for 1 repetitions
+Input tests/50000_299968_0.in benchmark took 273 milliseconds for 1 repetitions
+Input tests/60000_359967_0.in benchmark took 342 milliseconds for 1 repetitions
+Input tests/70000_419968_0.in benchmark took 408 milliseconds for 1 repetitions
+Input tests/80000_479973_0.in benchmark took 474 milliseconds for 1 repetitions
+Input tests/90000_539966_0.in benchmark took 533 milliseconds for 1 repetitions
+Input tests/100000_599961_0.in benchmark took 607 milliseconds for 1 repetitions
+
